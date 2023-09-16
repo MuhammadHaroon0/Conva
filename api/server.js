@@ -22,7 +22,6 @@ const { addMessage } = require("./socketHandler");
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL, // Replace with your frontend's URL
-    credentials: true, // This allows cookies to be sent in CORS requests
   },
 });
 
@@ -35,8 +34,15 @@ io.on("connection", (socket) => {
   socket.on("connected", (msg) => {
     console.log(msg);
   });
-  socket.on("addMsg", (data) => {
-    addMessage(data)
+  socket.on("sendmsg",async (data) => {
+    try {
+      const result = await addMessage(data);
+      io.emit('recmsg',result)
+    }
+    catch (error) {
+      console.error(error);
+    }
+    
   });
 });
 

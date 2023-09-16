@@ -1,4 +1,11 @@
 const mongoose=require('mongoose')
+const validator = require("validator");
+
+const singleMessage = new mongoose.Schema({
+    text: String,
+    from: mongoose.Schema.ObjectId,
+  });
+  
 const messageSchema=new mongoose.Schema({
     sender:{
         type:mongoose.Schema.ObjectId,
@@ -10,15 +17,17 @@ const messageSchema=new mongoose.Schema({
         required:[true,'receiver must be a user'],
         ref:'users'
     },
-    messages:{
+    names:{
         type:[String],
-        minLength:1,
-        validate: {
-            validator: function (val) {        
-              return val.length > 0;
-            },
-            message: "At least one feature is required",
-          },
+        required:[true,'receiver name is required'],
+    },
+    receiverEmail:{
+        type:String,
+        required:[true,'receiver email is required'],
+        validate: [validator.isEmail, "Email should be valid"],
+    },
+    messages:{
+        type:[singleMessage],
     },
     date:{
         type:Date,
