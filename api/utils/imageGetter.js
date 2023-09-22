@@ -7,17 +7,17 @@ const router=express.Router()
 const path = require('path');
 
 const getUserImage=catchAsync(async(req,res,next)=>{
-    doc=await userModel.findById(req.params.name).select({image:1});
+    const doc=await userModel.findById(req.params.id).select({image:1});
     if(!doc)
     {
         return next(new AppError('Doc not found matching this id!',404))
     }
     
-    const imgpath=path.join(__dirname,"..","/public/images/users/"+doc.image)
+    const imgpath=path.join(__dirname,"..","/public/images/"+doc.image)
    res.sendFile(imgpath)
 })
 
 
-router.get('/user/:name',protect,getUserImage)
+router.get('/user/:id',protect,getUserImage)
 
 module.exports=router

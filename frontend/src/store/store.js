@@ -4,7 +4,7 @@ import io from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
 import {produce} from 'immer'
-import { deepCopy, deepCopyWithAddition } from "../utils/deepcopy";
+import {  deepCopyWithAddition } from "../utils/deepcopy";
 const socket = io("http://localhost:5000");
 
 const useStore = create((set) => ({
@@ -92,10 +92,10 @@ const useStore = create((set) => ({
     }
   },
   userImg: null,
-  getUserImage: async (name) => {
+  getUserImage: async (id) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/image/user/${name}`,
+        `${process.env.REACT_APP_BACKEND_URL}/image/user/${id}`,
         { responseType: "arraybuffer", withCredentials: true }
       );
       const fileBlob = new Blob([response.data]);

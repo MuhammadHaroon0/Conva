@@ -7,6 +7,7 @@ import Navbar from "./Navbar";
 import Modal from "./Modal";
 import useStore from "../store/store";
 import io from "socket.io-client";
+import Welcome from "./Welcome";
 const socket = io("http://localhost:5000");
 
 const Main = () => {
@@ -22,18 +23,13 @@ const Main = () => {
   const selected = useStore((state) => state.selected);
   const getAllMessages = useStore((state) => state.getAllMessages);
 
-  useEffect(() => {
-    // Function to scroll the div to the bottom
-    const scrollToBottom = () => {
-      if (scrollableDivRef.current) {
-        scrollableDivRef.current.scrollTop = scrollableDivRef.current.scrollHeight;
-      }
-    };  scrollToBottom();
+    useEffect(() => {
+      scrollableDivRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }, [messages]); 
 
-    // Optionally, you can also listen for changes in 'selected' or 'messages' and scroll accordingly
-    // For example, if 'selected' or 'messages' change, scroll to bottom
-    // scrollToBottom();
-  }, [selected, messages]); 
+    
 
   useEffect(() => {
     const func = async () => {
@@ -53,7 +49,6 @@ const Main = () => {
       // console.log("klk");
       const id = currentUserID();
       if (id === newMessage.sender || id === newMessage.receiver) {
-        console.log("asd");
         setMessages(newMessage);
       }
     };
@@ -67,14 +62,21 @@ const Main = () => {
   }, []);
   
   useEffect(() => {
-    socket.on("recChat", (newChat) => {
+    const handleReceivedChats=(newChat => {
+      const id = currentUserID();
       if (
-        currentUserID() === newChat.sender ||
-        currentUserID() === newChat.receiver
-      ) {
+        id === newChat.sender ||
+        id === newChat.receiver
+        ) {
         setChats(newChat);
       }
     });
+
+    socket.on("recChat", handleReceivedChats)
+
+    return () => {
+      socket.off("recChat", handleReceivedChats);
+    };
   }, []);
 
   const selectedChat = () => {
@@ -91,7 +93,7 @@ const Main = () => {
       <div className="h-100 min-h-screen">
         <Navbar />
         <Modal />
-        <div className="md:px-12 px-2 py-8 max-w-90 flex flex-col md:flex-row bbgg">
+        <div className="px-2 py-8 max-w-90 flex flex-col md:flex-row">
           <div className="flex flex-col p-4 w-1/3">
             <div class="search mb-4">
               <i class="fa fa-search"></i>
@@ -115,16 +117,16 @@ const Main = () => {
               ))}
             </div>
           </div>
-          <div className="flex flex-col w-2/3 border border-white ">
-            <div className="py-3 px-12 flex space-x-4 items-center border-white border-b">
+          <div className={`flex flex-col w-2/3  ${selected&&'border border-white'}`}>
+            {selected&&<div className="py-3 px-12 flex space-x-4 items-center border-white border-b">
               <img src={logo} className="w-10" alt="as" />
               <h1 className="text-white font-bold">{selectedChat()}</h1>
-            </div>
-            <div className="pb-2  relative flex flex-col min-h-[21.3rem] max-h-[21.3rem] overflow-y-auto" ref={scrollableDivRef}>
-              {selected && messages.length > 0 && <Messages />}
+            </div>}
+            <div className={`pb-2 relative flex flex-col min-h-[21.3rem] max-h-[21.3rem] ${selected&&'overflow-y-auto'}`} ref={scrollableDivRef}>
+              {selected && messages.length > 0 ? <Messages />:<Welcome/>}
             </div>
             <div className="flex flex-col">
-              <ChatForm />
+              {selected&&<ChatForm />}
             </div>
           </div>
         </div>
