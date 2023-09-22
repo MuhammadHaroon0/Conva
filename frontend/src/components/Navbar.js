@@ -8,12 +8,14 @@ import useStore from '../store/store'
 export default function Navbar() {
   const [currentUser, setCurrentUserr] = useState(true);
   const setIsLoggedIn=useStore(state=>state.setIsLoggedIn)
+  const setSelected=useStore(state=>state.setSelected)
   const setCurrentUser = useStore((state) => state.setCurrentUser);
 
   const navigate = useNavigate();
   const handleLogout = () => {
     Cookies.remove("jwt");
     setCurrentUser(undefined)
+    setSelected(undefined)
     setIsLoggedIn(false);
     navigate("/login");
   };

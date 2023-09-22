@@ -21,11 +21,6 @@ const messageSchema=new mongoose.Schema({
         type:[String],
         required:[true,'receiver name is required'],
     },
-    receiverEmail:{
-        type:String,
-        required:[true,'receiver email is required'],
-        validate: [validator.isEmail, "Email should be valid"],
-    },
     messages:{
         type:[singleMessage],
     },

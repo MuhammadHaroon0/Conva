@@ -20,24 +20,14 @@ export const deepCopy= function (input) {
   }
 
 
-  export const  deepCopyWithAddition=function(input, elementToAdd) {
+  export const  deepCopyWithAddition=function(input) {
     //   console.log(input);
     // const newArr=lodash.cloneDeep(input)
     // newArr.push(elementToAdd)
     // return newArr
 
     const temp=lodash.cloneDeep(input)
-      // const res=newArr.findIndex(item=>item.receiver===elementToAdd.receiver)
-      // if(res===-1)
-      // {
-      //   newArr.push(elementToAdd)
-      // }
-      // else
-      // {
-      //   newArr[res].messages.push(elementToAdd.messages[elementToAdd.messages.length-1])
-      // }
-      if(temp)
-      temp.messages.push(input)
+          
       return temp
 
     

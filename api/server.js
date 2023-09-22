@@ -18,7 +18,7 @@ const cors = require("cors");
 
 const server = require("http").createServer(app);
 const { Server } = require("socket.io");
-const { addMessage } = require("./socketHandler");
+const { addMessage, addChat } = require("./socketHandler");
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL, // Replace with your frontend's URL
@@ -38,6 +38,17 @@ io.on("connection", (socket) => {
     try {
       const result = await addMessage(data);
       io.emit('recmsg',result)
+    }
+    catch (error) {
+      console.error(error);
+    }
+    
+  });
+
+  socket.on("addChat",async (data) => {
+    try {
+      const result = await addChat(data);
+      io.emit('recChat',result)
     }
     catch (error) {
       console.error(error);

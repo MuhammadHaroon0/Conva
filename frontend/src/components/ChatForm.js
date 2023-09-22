@@ -31,7 +31,8 @@ export default function ChatForm() {
 
   const handleFormSubmit =  (e) => {
     e.preventDefault();
-    sendMessage({message:{text:message,from:decoded.id},sender:decoded.id,receiver:selected.receiverEmail})
+
+    sendMessage({message:{text:message,from:decoded.id},sender:decoded.id,user1:selected.receiver,user2:selected.sender})
     setMessage("");
   };
 

@@ -3,31 +3,38 @@ import axios from "axios";
 import io from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
-import { deepCopyWithAddition } from "../utils/deepcopy";
+import {produce} from 'immer'
+import { deepCopy, deepCopyWithAddition } from "../utils/deepcopy";
 const socket = io("http://localhost:5000");
 
-const useStore = create((set, get) => ({
+const useStore = create((set) => ({
   messages: [],
   setMessages: (val) => {
     set((state) => {
-      const res = state.messages.findIndex(
-        (item) => item.receiver === val.receiver
+      const index = state.messages.findIndex((item) =>
+        (val.sender === item.sender && val.receiver === item.receiver) ||
+        (val.sender === item.receiver && val.receiver === item.sender)
       );
-      let newSel
-      if (res === -1) {
-        state.messages.push(val);
-      } else {
-        state.messages[res].messages.push(
-          val.messages[val.messages.length - 1]
-        );
-         newSel=deepCopyWithAddition(state.selected,val.messages[val.messages.length - 1])
-      }console.log(state.selected);
-      return {
-        messages: state.messages,
-        selected: newSel
-      };
+
+      if (index !== -1) {
+        // Use immer to update the state in an immutable way
+        console.log(val.messages[val.messages.length - 1])
+        return produce(state, (draftState) => {
+          draftState.messages[index].messages=[...draftState.messages[index].messages,val.messages[val.messages.length - 1]];
+        });
+      }
+
+      return state; // No match found, return the current state
     });
   },
+  setChats: (val) =>
+    set((state) => {
+      const added = deepCopyWithAddition(state.messages);
+      added.push(val)
+      return {
+        messages: added,
+      };
+    }),
 
   setMessagesOnInitialRender: (val) => set({ messages: val }),
 
@@ -101,6 +108,13 @@ const useStore = create((set, get) => ({
   sendMessage: (data) => {
     try {
       socket.emit("sendmsg", data);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  addChat: (data) => {
+    try {
+      socket.emit("addChat", data);
     } catch (error) {
       console.log(error);
     }

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import useStore from '../store/store'
 
 const Modal = () => {
-  const sendMessage=useStore(state=>state.sendMessage)
+  const addChat=useStore(state=>state.addChat)
   const currentUserID=useStore(state=>state.currentUserID)
 
     const [email,setEmail]=useState("");
@@ -12,7 +12,7 @@ const Modal = () => {
 
      const handleSubmit=()=>{
             // console.log();
-            sendMessage({sender:currentUserID(),receiver:email,message:{text:"Messages to this chat are secured",from:currentUserID()}})
+            addChat({sender:currentUserID(),receiver:email,message:{text:"Messages to this chat are secured",from:currentUserID()}})
             setEmail("")
       }
 
