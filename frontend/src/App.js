@@ -12,14 +12,12 @@ function App() {
   const setIsLoggedIn = useStore((state) => state.setIsLoggedIn);
 
   useEffect(() => {
-    if (Cookies.get('jwt')) setIsLoggedIn(true);
+    if (Cookies.get("jwt")) setIsLoggedIn(true);
     else setIsLoggedIn(false);
   }, []);
 
-  
   return (
     <>
-   
       <Routes>
         <Route exact path="/signup" element={<SignUp />} />
         <Route exact path="/login" element={<Login />} />
@@ -28,7 +26,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Main/>
+              <Main />
             </ProtectedRoute>
           }
         />

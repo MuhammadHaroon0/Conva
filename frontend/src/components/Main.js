@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SideChats from "./SideChats";
 import logo from "./../resources/logo.svg";
 import ChatForm from "./ChatForm";
@@ -11,27 +11,41 @@ import Welcome from "./Welcome";
 const socket = io("http://localhost:5000");
 
 const Main = () => {
-  const scrollableDivRef = useRef(null);
+  const scrollableDivRef = useRef(null); //scrollable div for messages
+
+  const [searchQuery,setSearchQuery]=useState("");
 
   const setMessages = useStore((state) => state.setMessages);
   const setChats = useStore((state) => state.setChats);
+
   const setMessagesOnInitialRender = useStore(
     (state) => state.setMessagesOnInitialRender
   );
+
   const messages = useStore((state) => state.messages);
   const currentUserID = useStore((state) => state.currentUserID);
   const selected = useStore((state) => state.selected);
   const getAllMessages = useStore((state) => state.getAllMessages);
 
-    useEffect(() => {
-      scrollableDivRef.current?.scrollIntoView({
-        behavior: "smooth",
-      });
-    }, [messages]); 
+  const handleChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
-    
+  const scroll=()=>{
+    scrollableDivRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }
+  useEffect(() => {
+    //listening for changes on adding messages
+    setTimeout(() => {
+        
+      scroll()
+    }, 100);
+  }, [messages,selected]);
 
   useEffect(() => {
+    //api call for reload
     const func = async () => {
       try {
         const id = currentUserID();
@@ -45,34 +59,36 @@ const Main = () => {
   }, []);
 
   useEffect(() => {
+    //single message receiving
     const handleReceivedMessage = (newMessage) => {
-      // console.log("klk");
       const id = currentUserID();
       if (id === newMessage.sender || id === newMessage.receiver) {
         setMessages(newMessage);
       }
+      setTimeout(() => {
+        
+        scroll()
+      }, 100);
     };
-  
+
     socket.on("recmsg", handleReceivedMessage);
-  
+
     // Cleanup function to unsubscribe from the event when the component unmounts
     return () => {
       socket.off("recmsg", handleReceivedMessage);
     };
   }, []);
-  
+
   useEffect(() => {
-    const handleReceivedChats=(newChat => {
+    //add friend update on ui
+    const handleReceivedChats = (newChat) => {
       const id = currentUserID();
-      if (
-        id === newChat.sender ||
-        id === newChat.receiver
-        ) {
+      if (id === newChat.sender || id === newChat.receiver) {
         setChats(newChat);
       }
-    });
+    };
 
-    socket.on("recChat", handleReceivedChats)
+    socket.on("recChat", handleReceivedChats);
 
     return () => {
       socket.off("recChat", handleReceivedChats);
@@ -80,6 +96,7 @@ const Main = () => {
   }, []);
 
   const selectedChat = () => {
+    //showing the name of selected user chat on top of messages
     if (selected && currentUserID() === selected.sender) {
       return selected.names[1];
     } else if (selected) {
@@ -92,12 +109,12 @@ const Main = () => {
     <>
       <div className="h-100 min-h-screen">
         <Navbar />
-        <Modal />
-        <div className="px-2 py-8 max-w-90 flex flex-col md:flex-row">
-          <div className="flex flex-col p-4 w-1/3">
+        <Modal /> {/* for adding friend */}
+        <div className="px-2 py-8  flex flex-col md:flex-row">
+          <div className="flex flex-col p-4 lg:w-1/3">
             <div class="search mb-4">
               <i class="fa fa-search"></i>
-              <input type="text" class="form-control" placeholder="Search" />
+              <input type="text" name="search" onChange={handleChange} value={searchQuery} class="form-control" placeholder="Search" />
             </div>
             <div className="flex flex-row  mb-2  justify-between items-center">
               <h1 className="font-bold text-white">Chats</h1>
@@ -111,23 +128,40 @@ const Main = () => {
                 Add Friend
               </button>
             </div>
+
             <div className="border-white border-t flex flex-col">
               {messages.map((item) => (
-                <SideChats item={item} />
+                <SideChats item={item} searchQuery={searchQuery} />
               ))}
             </div>
           </div>
-          <div className={`flex flex-col w-2/3  ${selected&&'border border-white'}`}>
-            {selected&&<div className="py-3 px-12 flex space-x-4 items-center border-white border-b">
-              <img src={logo} className="w-10" alt="as" />
-              <h1 className="text-white font-bold">{selectedChat()}</h1>
-            </div>}
-            <div className={`pb-2 relative flex flex-col min-h-[21.3rem] max-h-[21.3rem] ${selected&&'overflow-y-auto'}`} ref={scrollableDivRef}>
-              {selected && messages.length > 0 ? <Messages />:<Welcome/>}
+          <div
+            className={`flex flex-col lg:w-2/3  ${
+              selected && "border border-white"
+            }`}
+          >
+            {selected && (
+              <div className="py-3 px-12 flex space-x-4 items-center border-white border-b">
+                <img src={logo} className="w-10" alt="as" />
+                <h1 className="text-white font-bold">{selectedChat()}</h1>
+              </div>
+            )}
+
+            <div
+              className={`pb-2 relative flex flex-col min-h-[21.3rem] lg:max-h-[21.3rem] ${
+                selected && "overflow-y-auto"
+              }`}
+              
+            >
+              {selected && messages.length > 0 ?
+              <>
+              <Messages /> 
+              <div ref={scrollableDivRef}/>
+              </> : <Welcome />}
+             
             </div>
-            <div className="flex flex-col">
-              {selected&&<ChatForm />}
-            </div>
+
+            <div className="flex flex-col">{selected && <ChatForm />}</div>
           </div>
         </div>
       </div>

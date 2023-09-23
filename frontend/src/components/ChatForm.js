@@ -3,18 +3,18 @@ import { PaperAirplaneIcon } from "@heroicons/react/solid";
 import { EmojiHappyIcon } from "@heroicons/react/solid";
 import Picker from "emoji-picker-react";
 import useStore from './../store/store'
-import Cookies from "js-cookie";
-import jwt_decode from "jwt-decode";
+
 
 export default function ChatForm() {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const sendMessage=useStore(state=>state.sendMessage)
   const selected = useStore((state) => state.selected);
+  const currentUserID = useStore((state) => state.currentUserID);
 
   const [decoded,setDecoded]=useState(undefined);
   useEffect(() => {
-    setDecoded(jwt_decode(Cookies.get('jwt')))
+    setDecoded(currentUserID()) //will be used for sending messages as a sender id
   }, []);
 
   const scrollRef = useRef();
@@ -32,15 +32,15 @@ export default function ChatForm() {
   const handleFormSubmit =  (e) => {
     e.preventDefault();
 
-    sendMessage({message:{text:message,from:decoded.id},sender:decoded.id,user1:selected.receiver,user2:selected.sender})
+    sendMessage({message:{text:message,from:decoded},sender:decoded,user1:selected.receiver,user2:selected.sender})//socket call going in store.js
     setMessage("");
   };
 
   return (
-    <div ref={scrollRef}>
-      <div className="absolute bottom-24">
+    <div ref={scrollRef} className="relative">
+      <div className="absolute bottom-16">
       {showEmojiPicker && (
-        <Picker className="dark:bg-gray-900" height={300} onEmojiClick={handleEmojiClick} />
+        <Picker className="" height={300} width={300} onEmojiClick={handleEmojiClick} />
         )}
 
       </div>

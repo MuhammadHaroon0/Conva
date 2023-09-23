@@ -9,7 +9,7 @@ const Messages = () => {
 
   const currentUserID = useStore((state) => state.currentUserID);
   useEffect(() => {
-    // console.log(messages);
+    // based on selected chat finding the messages
       const cur=messages.find((item)=>(item.sender===selected.sender && item.receiver===selected.receiver )
       ||(item.sender===selected.receiver && item.receiver===selected.sender ))
       if(cur!==-1)
